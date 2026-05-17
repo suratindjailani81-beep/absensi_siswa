@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1565C0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Absensi Sekolah">
+<title>Absensi Sekolah</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --biru: #1565C0;
+    --biru-muda: #1976D2;
+    --biru-terang: #E3F2FD;
+    --hijau: #2E7D32;
+    --hijau-muda: #E8F5E9;
+    --merah: #C62828;
+    --merah-muda: #FFEBEE;
+    --kuning: #F57F17;
+    --kuning-muda: #FFF8E1;
+    --abu: #546E7A;
+    --abu-muda: #ECEFF1;
+    --putih: #FFFFFF;
+    --teks: #212121;
+    --teks-abu: #607D8B;
+    --shadow: 0 2px 12px rgba(0,0,0,0.12);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.18);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #F0F4F8;
+    color: var(--teks);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== LAYOUT ===== */
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+  .halaman { display: none; flex: 1; flex-direction: column; min-height: 100vh; }
+  .halaman.aktif { display: flex; }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--biru) 0%, var(--biru-muda) 100%);
+    color: white;
+    padding: 20px 20px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: 0; right: 0;
+    height: 40px;
+    background: #F0F4F8;
+    border-radius: 20px 20px 0 0;
+  }
+  .header-logo {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 24px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; text-align: center; }
+  .header p  { font-size: 13px; opacity: 0.85; text-align: center; margin-top: 4px; }
+
+  /* ===== KONTEN ===== */
+  .konten {
+    flex: 1;
+    padding: 16px 16px 24px;
+    overflow-y: auto;
+  }
+
+  /* ===== CARD ===== */
+  .card {
+    background: var(--putih);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-judul {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--teks);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-judul .ikon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: var(--biru-terang);
+  }
+
+  /* ===== FORM ===== */
+  .form-grup { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--teks-abu);
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #CFD8DC;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    color: var(--teks);
+    background: var(--putih);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .form-input:focus {
+    border-color: var(--biru);
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.15);
+  }
+  .form-input::placeholder { color: #B0BEC5; }
+
+  /* ===== TOMBOL ===== */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-utama {
+    background: var(--biru);
+    color: white;
+    box-shadow: 0 4px 12px rgba(21,101,192,0.35);
+  }
+  .btn-utama:hover { background: #1976D2; }
+  .btn-utama:disabled {
+    background: #B0BEC5;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-hijau {
+    background: var(--hijau);
+    color: white;
+    box-shadow: 0 4px 12px rgba(46,125,50,0.35);
+  }
+  .btn-hijau:hover { background: #388E3C; }
+  .btn-hijau:disabled {
+    background: #B0BEC5;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--biru);
+    border: 1.5px solid var(--biru);
+  }
+  .btn-outline:hover { background: var(--biru-terang); }
+  .btn-bahaya {
+    background: transparent;
+    color: var(--merah);
+    border: 1.5px solid var(--merah);
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* ===== TOMBOL ABSEN BESAR ===== */
+  .btn-absen {
+    width: 100%;
+    padding: 20px;
+    border: none;
+    border-radius: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-absen:active { transform: scale(0.97); }
+  .btn-absen-datang {
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+    color: white;
+    box-shadow: 0 6px 20px rgba(21,101,192,0.4);
+  }
+  .btn-absen-pulang {
+    background: linear-gradient(135deg, #2E7D32, #388E3C);
+    color: white;
+    box-shadow: 0 6px 20px rgba(46,125,50,0.4);
+  }
+  .btn-absen:disabled {
+    background: #CFD8DC;
+    color: #90A4AE;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-absen .btn-ikon {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .btn-absen:disabled .btn-ikon { background: rgba(0,0,0,0.05); }
+  .btn-absen .btn-teks { text-align: left; }
+  .btn-absen .btn-teks-utama { display: block; font-size: 16px; }
+  .btn-absen .btn-teks-sub { display: block; font-size: 12px; opacity: 0.8; font-weight: 400; margin-top: 2px; }
+
+  /* ===== BADGE STATUS ===== */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-hijau  { background: var(--hijau-muda);  color: var(--hijau); }
+  .badge-merah  { background: var(--merah-muda);  color: var(--merah); }
+  .badge-kuning { background: var(--kuning-muda); color: var(--kuning); }
+  .badge-abu    { background: var(--abu-muda);    color: var(--abu); }
+  .badge-biru   { background: var(--biru-terang); color: var(--biru); }
+
+  /* ===== INFO SISWA HEADER ===== */
+  .siswa-header {
+    background: linear-gradient(135deg, var(--biru) 0%, var(--biru-muda) 100%);
+    padding: 20px 20px 40px;
+    color: white;
+    position: relative;
+  }
+  .siswa-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 32px;
+    background: #F0F4F8;
+    border-radius: 20px 20px 0 0;
+  }
+  .siswa-avatar {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    margin: 0 auto 12px;
+    border: 3px solid rgba(255,255,255,0.5);
+  }
+  .siswa-nama { font-size: 19px; font-weight: 700; text-align: center; }
+  .siswa-nis  { font-size: 13px; opacity: 0.8; text-align: center; margin-top: 4px; }
+
+  /* ===== WAKTU SEKARANG ===== */
+  .waktu-box {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+  }
+  .waktu-jam { font-size: 28px; font-weight: 700; color: var(--biru); font-variant-numeric: tabular-nums; }
+  .waktu-tgl { font-size: 13px; color: var(--teks-abu); text-align: right; }
+
+  /* ===== STATUS CARD ===== */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .status-item {
+    background: white;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .status-item .label { font-size: 11px; color: var(--teks-abu); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .status-item .nilai { font-size: 14px; font-weight: 600; color: var(--teks); }
+
+  /* ===== RIWAYAT ===== */
+  .riwayat-item {
+    border-bottom: 1px solid #ECEFF1;
+    padding: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .riwayat-item:last-child { border-bottom: none; }
+  .riwayat-tgl  { font-size: 13px; font-weight: 600; color: var(--teks); }
+  .riwayat-jam  { font-size: 12px; color: var(--teks-abu); margin-top: 3px; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 16px; right: 16px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+    box-shadow: var(--shadow-lg);
+    max-width: 400px;
+    margin: 0 auto;
+    animation: slideUp 0.3s ease;
+  }
+  .toast.tampil { display: flex; }
+  .toast-sukses { background: #1B5E20; color: white; }
+  .toast-error  { background: #B71C1C; color: white; }
+  .toast-info   { background: #0D47A1; color: white; }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* ===== LOADING ===== */
+  .overlay-loading {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 8888;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    color: white;
+  }
+  .overlay-loading.tampil { display: flex; }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: putar 0.8s linear infinite;
+  }
+  .loading-teks { font-size: 14px; font-weight: 500; }
+  @keyframes putar { to { transform: rotate(360deg); } }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    display: none;
+    background: white;
+    border-top: 1px solid #ECEFF1;
+    padding: 8px 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+  }
+  .bottom-nav.tampil { display: flex; }
+  .nav-items { display: flex; width: 100%; }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #90A4AE;
+    font-size: 11px;
+    font-weight: 500;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-item.aktif { color: var(--biru); }
+  .nav-ikon { font-size: 22px; }
+
+  /* ===== TAB KONTEN ===== */
+  .tab-konten { display: none; }
+  .tab-konten.aktif { display: block; }
+
+  /* ===== LINK ===== */
+  .link { color: var(--biru); text-decoration: none; font-weight: 500; cursor: pointer; }
+  .teks-tengah { text-align: center; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .teks-kecil { font-size: 13px; color: var(--teks-abu); }
+
+  /* ===== DIVIDER ===== */
+  .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #ECEFF1; }
+  .divider span { font-size: 12px; color: #B0BEC5; }
+
+  /* ===== INFO BOX ===== */
+  .info-box {
+    background: var(--biru-terang);
+    border-left: 4px solid var(--biru);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #1A237E;
+    line-height: 1.6;
+  }
+  .info-box.kuning {
+    background: var(--kuning-muda);
+    border-color: var(--kuning);
+    color: #4E342E;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ======================================
+       HALAMAN: DAFTAR
+  ====================================== -->
+  <div id="hal-daftar" class="halaman aktif" style="background:#F0F4F8;">
+    <div class="header">
+      <div class="header-logo">🏫</div>
+      <h1>Absensi Sekolah</h1>
+      <p>Daftar Akun Siswa Baru</p>
+    </div>
+
+    <div class="konten" style="padding-top:24px;">
+      <div class="card">
+        <div class="card-judul">
+          <div class="ikon">📝</div>
+          Buat Akun Siswa
+        </div>
+
+        <div class="info-box">
+          Masukkan Nama Lengkap dan NIS kamu sesuai data sekolah. Pastikan NIS benar karena tidak bisa diubah.
+        </div>
+
+        <div class="form-grup">
+          <label class="form-label">Nama Lengkap</label>
+          <input id="daftar-nama" class="form-input" type="text" placeholder="Contoh: Ahmad Fauzi" autocomplete="off">
+        </div>
+
+        <div class="form-grup">
+          <label class="form-label">NIS (Nomor Induk Siswa)</label>
+          <input id="daftar-nis" class="form-input" type="text" inputmode="numeric" placeholder="Contoh: 2024001" autocomplete="off">
+        </div>
+
+        <button class="btn btn-utama mt-8" onclick="aksiDaftar()">
+          ✅ Daftar Sekarang
+        </button>
+
+        <div class="divider"><span>atau</span></div>
+
+        <p class="teks-tengah teks-kecil">
+          Sudah punya akun? <span class="link" onclick="pindahHalaman('login')">Masuk di sini</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       HALAMAN: LOGIN
+  ====================================== -->
+  <div id="hal-login" class="halaman" style="background:#F0F4F8;">
+    <div class="header">
+      <div class="header-logo">🏫</div>
+      <h1>Absensi Sekolah</h1>
+      <p>Masuk ke Akun Siswa</p>
+    </div>
+
+    <div class="konten" style="padding-top:24px;">
+      <div class="card">
+        <div class="card-judul">
+          <div class="ikon">🔑</div>
+          Masuk Akun
+        </div>
+
+        <div class="form-grup">
+          <label class="form-label">NIS (Nomor Induk Siswa)</label>
+          <input id="login-nis" class="form-input" type="text" inputmode="numeric" placeholder="Masukkan NIS kamu" autocomplete="off">
+        </div>
+
+        <button class="btn btn-utama" onclick="aksiLogin()">
+          🚀 Masuk
+        </button>
+
+        <div class="divider"><span>atau</span></div>
+
+        <p class="teks-tengah teks-kecil">
+          Belum punya akun? <span class="link" onclick="pindahHalaman('daftar')">Daftar di sini</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       HALAMAN: UTAMA (Dashboard)
+  ====================================== -->
+  <div id="hal-utama" class="halaman" style="background:#F0F4F8; flex-direction:column;">
+
+    <!-- Header Siswa -->
+    <div class="siswa-header">
+      <div class="siswa-avatar" id="avatar-inisial">A</div>
+      <div class="siswa-nama" id="display-nama">Nama Siswa</div>
+      <div class="siswa-nis" id="display-nis">NIS: -</div>
+    </div>
+
+    <!-- Konten Tab -->
+    <div class="konten" style="flex:1; overflow-y:auto;">
+
+      <!-- TAB: ABSEN -->
+      <div id="tab-absen" class="tab-konten aktif">
+
+        <!-- Jam Sekarang -->
+        <div class="waktu-box">
+          <div>
+            <div class="waktu-jam" id="jam-sekarang">00:00:00</div>
+            <div style="font-size:12px;color:var(--teks-abu);margin-top:2px;">Waktu saat ini (WITA)</div>
+          </div>
+          <div class="waktu-tgl" id="tgl-sekarang">-</div>
+        </div>
+
+        <!-- Status Hari Ini -->
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="label">Absen Datang</div>
+            <div class="nilai" id="status-datang">—</div>
+          </div>
+          <div class="status-item">
+            <div class="label">Absen Pulang</div>
+            <div class="nilai" id="status-pulang">—</div>
+          </div>
+        </div>
+
+        <!-- Keterangan -->
+        <div class="card" id="card-keterangan" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13px;color:var(--teks-abu);">Keterangan hari ini</span>
+            <span id="badge-keterangan" class="badge badge-abu">Belum Absen</span>
+          </div>
+        </div>
+
+        <!-- Tombol Absen -->
+        <button id="btn-datang" class="btn-absen btn-absen-datang" onclick="aksiAbsen('datang')">
+          <div class="btn-ikon">🏫</div>
+          <div class="btn-teks">
+            <span class="btn-teks-utama">Absen Datang</span>
+            <span class="btn-teks-sub">Tepat waktu: 06.00 – 07.30</span>
+          </div>
+        </button>
+
+        <button id="btn-pulang" class="btn-absen btn-absen-pulang" onclick="aksiAbsen('pulang')">
+          <div class="btn-ikon">🏠</div>
+          <div class="btn-teks">
+            <span class="btn-teks-utama">Absen Pulang</span>
+            <span class="btn-teks-sub">Bisa mulai pukul 15.00</span>
+          </div>
+        </button>
+
+        <div class="info-box kuning" style="margin-top:8px;">
+          📍 Absen hanya bisa dilakukan di area sekolah (radius 100 meter). Pastikan GPS aktif.
+        </div>
+
+      </div>
+
+      <!-- TAB: RIWAYAT -->
+      <div id="tab-riwayat" class="tab-konten">
+        <div class="card">
+          <div class="card-judul">
+            <div class="ikon">📅</div>
+            Riwayat 10 Hari Terakhir
+          </div>
+          <div id="list-riwayat">
+            <p class="teks-kecil teks-tengah" style="padding:20px 0;">Memuat riwayat...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: PROFIL -->
+      <div id="tab-profil" class="tab-konten">
+        <div class="card">
+          <div class="card-judul">
+            <div class="ikon">👤</div>
+            Profil Siswa
+          </div>
+          <div style="text-align:center;padding:10px 0 20px;">
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--biru-terang);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:var(--biru);margin:0 auto 16px;" id="profil-avatar">A</div>
+            <div style="font-size:20px;font-weight:700;" id="profil-nama">-</div>
+            <div style="font-size:14px;color:var(--teks-abu);margin-top:4px;" id="profil-nis">NIS: -</div>
+          </div>
+          <div style="border-top:1px solid #ECEFF1;padding-top:16px;margin-top:8px;">
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #ECEFF1;font-size:14px;">
+              <span style="color:var(--teks-abu);">Nama Lengkap</span>
+              <span id="profil-nama2" style="font-weight:500;">-</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:14px;">
+              <span style="color:var(--teks-abu);">Nomor Induk Siswa</span>
+              <span id="profil-nis2" style="font-weight:500;">-</span>
+            </div>
+          </div>
+          <button class="btn btn-bahaya mt-16" onclick="aksiKeluar()">
+            🚪 Keluar / Ganti Akun
+          </button>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="card-judul">
+            <div class="ikon">ℹ️</div>
+            Aturan Absensi
+          </div>
+          <div style="font-size:13px;line-height:1.8;color:var(--teks-abu);">
+            <p>• <strong style="color:var(--teks);">Tepat Waktu:</strong> Absen datang 06.00 – 07.30</p>
+            <p>• <strong style="color:var(--teks);">Terlambat:</strong> Absen datang setelah 07.30</p>
+            <p>• <strong style="color:var(--teks);">Absen Pulang:</strong> Bisa mulai pukul 15.00</p>
+            <p>• <strong style="color:var(--teks);">Cepat Pulang/Bolos:</strong> Tidak absen pulang</p>
+            <p>• <strong style="color:var(--teks);">Tidak Hadir:</strong> Tidak absen sama sekali</p>
+            <p style="margin-top:8px;">📍 Wajib berada dalam radius <strong style="color:var(--teks);">100 meter</strong> dari sekolah.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end konten -->
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav tampil">
+      <div class="nav-items">
+        <button class="nav-item aktif" onclick="gantTab('absen', this)">
+          <span class="nav-ikon">✅</span>
+          <span>Absen</span>
+        </button>
+        <button class="nav-item" onclick="gantTab('riwayat', this)">
+          <span class="nav-ikon">📋</span>
+          <span>Riwayat</span>
+        </button>
+        <button class="nav-item" onclick="gantTab('profil', this)">
+          <span class="nav-ikon">👤</span>
+          <span>Profil</span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- end hal-utama -->
+
+</div><!-- end app -->
+
+<!-- Toast Notifikasi -->
+<div id="toast" class="toast">
+  <span id="toast-ikon">✅</span>
+  <span id="toast-pesan">Pesan notifikasi</span>
+</div>
+
+<!-- Loading Overlay -->
+<div id="overlay-loading" class="overlay-loading">
+  <div class="spinner"></div>
+  <div class="loading-teks" id="loading-teks">Memproses...</div>
+</div>
+
+<script>
+// ============================================================
+//  KONFIGURASI — WAJIB DIISI
+// ============================================================
+// Ganti dengan URL Google Apps Script Web App kamu setelah deploy
+var API_URL = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzSzwjAe1b9pahPZahQ_hRBslIcdAaarQmSpuOJ8wVH0DZnVPxWPzOcXD6_S_CPAP65wA/exec";
+
+// ============================================================
+//  STATE APLIKASI
+// ============================================================
+var state = {
+  siswa: null,
+  statusHariIni: null,
+  timerJam: null
+};
+
+// ============================================================
+//  INISIALISASI
+// ============================================================
+window.addEventListener('load', function() {
+  // Daftarkan service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(function() {});
+  }
+
+  // Cek apakah sudah login
+  var dataLogin = localStorage.getItem('absensi_siswa');
+  if (dataLogin) {
+    try {
+      state.siswa = JSON.parse(dataLogin);
+      masukDashboard();
+    } catch(e) {
+      localStorage.removeItem('absensi_siswa');
+    }
+  }
+});
+
+// ============================================================
+//  NAVIGASI HALAMAN
+// ============================================================
+function pindahHalaman(id) {
+  document.querySelectorAll('.halaman').forEach(function(h) {
+    h.classList.remove('aktif');
+  });
+  document.getElementById('hal-' + id).classList.add('aktif');
+}
+
+function gantTab(id, btn) {
+  document.querySelectorAll('.tab-konten').forEach(function(t) {
+    t.classList.remove('aktif');
+  });
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.classList.remove('aktif');
+  });
+  document.getElementById('tab-' + id).classList.add('aktif');
+  btn.classList.add('aktif');
+
+  if (id === 'riwayat') muatRiwayat();
+}
+
+// ============================================================
+//  DAFTAR AKUN
+// ============================================================
+function aksiDaftar() {
+  var nama = document.getElementById('daftar-nama').value.trim();
+  var nis  = document.getElementById('daftar-nis').value.trim();
+
+  if (!nama) { tampilToast('error', 'Nama lengkap wajib diisi.'); return; }
+  if (!nis)  { tampilToast('error', 'NIS wajib diisi.'); return; }
+  if (!/^\d+$/.test(nis)) { tampilToast('error', 'NIS hanya boleh berisi angka.'); return; }
+
+  tampilLoading('Mendaftarkan akun...');
+  kirimAPI({ aksi: 'daftar', nama: nama, nis: nis }, function(res) {
+    sembunyiLoading();
+    if (res.status === 'success') {
+      state.siswa = { nis: nis, nama: nama };
+      localStorage.setItem('absensi_siswa', JSON.stringify(state.siswa));
+      tampilToast('sukses', res.message);
+      setTimeout(masukDashboard, 1000);
+    } else {
+      tampilToast('error', res.message);
+    }
+  });
+}
+
+// ============================================================
+//  LOGIN
+// ============================================================
+function aksiLogin() {
+  var nis = document.getElementById('login-nis').value.trim();
+  if (!nis) { tampilToast('error', 'NIS wajib diisi.'); return; }
+
+  tampilLoading('Memeriksa data...');
+  kirimAPI({ aksi: 'login', nis: nis }, function(res) {
+    sembunyiLoading();
+    if (res.status === 'success') {
+      state.siswa = { nis: res.data.nis, nama: res.data.nama };
+      localStorage.setItem('absensi_siswa', JSON.stringify(state.siswa));
+      tampilToast('sukses', 'Selamat datang, ' + res.data.nama + '!');
+      setTimeout(masukDashboard, 800);
+    } else {
+      tampilToast('error', res.message);
+    }
+  });
+}
+
+// ============================================================
+//  MASUK DASHBOARD
+// ============================================================
+function masukDashboard() {
+  var s = state.siswa;
+  var inisial = s.nama.split(' ').map(function(w){ return w[0]; }).join('').substring(0, 2).toUpperCase();
+
+  document.getElementById('avatar-inisial').textContent = inisial;
+  document.getElementById('display-nama').textContent   = s.nama;
+  document.getElementById('display-nis').textContent    = 'NIS: ' + s.nis;
+  document.getElementById('profil-avatar').textContent  = inisial;
+  document.getElementById('profil-nama').textContent    = s.nama;
+  document.getElementById('profil-nis').textContent     = 'NIS: ' + s.nis;
+  document.getElementById('profil-nama2').textContent   = s.nama;
+  document.getElementById('profil-nis2').textContent    = s.nis;
+
+  pindahHalaman('utama');
+  mulaiJam();
+  muatStatusHariIni();
+}
+
+// ============================================================
+//  JAM LIVE
+// ============================================================
+function mulaiJam() {
+  if (state.timerJam) clearInterval(state.timerJam);
+  function update() {
+    var now = new Date();
+    var hh = String(now.getHours()).padStart(2,'0');
+    var mm = String(now.getMinutes()).padStart(2,'0');
+    var ss = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('jam-sekarang').textContent = hh + ':' + mm + ':' + ss;
+
+    var hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    var bln  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('tgl-sekarang').textContent =
+      hari[now.getDay()] + '\n' + now.getDate() + ' ' + bln[now.getMonth()] + ' ' + now.getFullYear();
+  }
+  update();
+  state.timerJam = setInterval(update, 1000);
+}
+
+// ============================================================
+//  STATUS HARI INI
+// ============================================================
+function muatStatusHariIni() {
+  kirimAPI({ aksi: 'statusHari', nis: state.siswa.nis }, function(res) {
+    if (res.status === 'success') {
+      state.statusHariIni = res.data;
+      updateUIStatus(res.data);
+    }
+  });
+}
+
+function updateUIStatus(data) {
+  var elDatang = document.getElementById('status-datang');
+  var elPulang = document.getElementById('status-pulang');
+  var elBadge  = document.getElementById('badge-keterangan');
+  var btnDatang = document.getElementById('btn-datang');
+  var btnPulang = document.getElementById('btn-pulang');
+
+  elDatang.textContent = data.waktuDatang || '—';
+  elPulang.textContent = data.waktuPulang || '—';
+
+  // Update badge keterangan
+  if (data.keterangan) {
+    var kls = 'badge-abu';
+    if (data.keterangan.indexOf('Tepat') !== -1) kls = 'badge-hijau';
+    else if (data.keterangan.indexOf('Terlambat') !== -1) kls = 'badge-kuning';
+    else if (data.keterangan.indexOf('Cepat') !== -1 || data.keterangan.indexOf('Bolos') !== -1) kls = 'badge-merah';
+    elBadge.className = 'badge ' + kls;
+    elBadge.textContent = data.keterangan;
+  } else {
+    elBadge.className = 'badge badge-abu';
+    elBadge.textContent = 'Belum Absen';
+  }
+
+  // Tombol absen datang
+  btnDatang.disabled = data.sudahDatang;
+  if (data.sudahDatang) {
+    btnDatang.querySelector('.btn-teks-sub').textContent = 'Sudah absen pukul ' + data.waktuDatang;
+  }
+
+  // Tombol absen pulang
+  var now = new Date();
+  var bisaPulang = now.getHours() >= 15;
+  btnPulang.disabled = data.sudahPulang || !data.sudahDatang || !bisaPulang;
+  if (data.sudahPulang) {
+    btnPulang.querySelector('.btn-teks-sub').textContent = 'Sudah absen pukul ' + data.waktuPulang;
+  } else if (!bisaPulang) {
+    btnPulang.querySelector('.btn-teks-sub').textContent = 'Belum bisa (buka pukul 15.00)';
+  } else if (!data.sudahDatang) {
+    btnPulang.querySelector('.btn-teks-sub').textContent = 'Absen datang dulu';
+  }
+}
+
+// ============================================================
+//  PROSES ABSEN
+// ============================================================
+function aksiAbsen(jenis) {
+  tampilLoading('Mengambil lokasi GPS...');
+
+  if (!navigator.geolocation) {
+    sembunyiLoading();
+    tampilToast('error', 'Browser kamu tidak mendukung GPS. Gunakan Chrome.');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      document.getElementById('loading-teks').textContent = 'Mencatat absen...';
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      var aksi = jenis === 'datang' ? 'absenDatang' : 'absenPulang';
+
+      kirimAPI({ aksi: aksi, nis: state.siswa.nis, latitude: lat, longitude: lng }, function(res) {
+        sembunyiLoading();
+        if (res.status === 'success') {
+          tampilToast('sukses', res.message);
+          muatStatusHariIni();
+        } else {
+          tampilToast('error', res.message);
+        }
+      });
+    },
+    function(err) {
+      sembunyiLoading();
+      var pesan = 'Tidak bisa mengambil lokasi. ';
+      if (err.code === 1) pesan += 'Izinkan akses lokasi di browser.';
+      else if (err.code === 2) pesan += 'GPS tidak tersedia. Pindah ke tempat terbuka.';
+      else pesan += 'Coba lagi beberapa saat.';
+      tampilToast('error', pesan);
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+// ============================================================
+//  MUAT RIWAYAT
+// ============================================================
+function muatRiwayat() {
+  var el = document.getElementById('list-riwayat');
+  el.innerHTML = '<p class="teks-kecil teks-tengah" style="padding:20px 0;">Memuat riwayat...</p>';
+
+  kirimAPI({ aksi: 'riwayat', nis: state.siswa.nis, limit: 10 }, function(res) {
+    if (res.status === 'success' && res.data.data && res.data.data.length > 0) {
+      var html = '';
+      res.data.data.forEach(function(item) {
+        var badgeKls = 'badge-abu';
+        var ket = item.keterangan || 'Tidak Hadir';
+        if (ket.indexOf('Tepat') !== -1)   badgeKls = 'badge-hijau';
+        else if (ket.indexOf('Terlambat') !== -1) badgeKls = 'badge-kuning';
+        else if (ket.indexOf('Hadir') !== -1 || ket.indexOf('Bolos') !== -1) badgeKls = 'badge-merah';
+
+        html += '<div class="riwayat-item">' +
+          '<div>' +
+            '<div class="riwayat-tgl">' + item.tanggal + '</div>' +
+            '<div class="riwayat-jam">Datang: ' + (item.waktuDatang || '-') + ' &nbsp;|&nbsp; Pulang: ' + (item.waktuPulang || '-') + '</div>' +
+          '</div>' +
+          '<span class="badge ' + badgeKls + '" style="white-space:nowrap;font-size:11px;">' + ket + '</span>' +
+        '</div>';
+      });
+      el.innerHTML = html;
+    } else {
+      el.innerHTML = '<p class="teks-kecil teks-tengah" style="padding:20px 0;">Belum ada riwayat absen.</p>';
+    }
+  });
+}
+
+// ============================================================
+//  KELUAR
+// ============================================================
+function aksiKeluar() {
+  if (confirm('Yakin ingin keluar dari akun ini?')) {
+    localStorage.removeItem('absensi_siswa');
+    state.siswa = null;
+    if (state.timerJam) clearInterval(state.timerJam);
+    pindahHalaman('login');
+  }
+}
+
+// ============================================================
+//  API HELPER
+// ============================================================
+function kirimAPI(data, callback) {
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(data),
+    mode: 'cors'
+  })
+  .then(function(r) { return r.json(); })
+  .then(callback)
+  .catch(function(err) {
+    sembunyiLoading();
+    callback({ status: 'error', message: 'Gagal terhubung ke server. Periksa koneksi internet kamu.' });
+  });
+}
+
+// ============================================================
+//  UI HELPERS
+// ============================================================
+function tampilToast(jenis, pesan) {
+  var el     = document.getElementById('toast');
+  var elMsg  = document.getElementById('toast-pesan');
+  var elIkon = document.getElementById('toast-ikon');
+
+  el.className = 'toast tampil';
+  if (jenis === 'sukses') { el.classList.add('toast-sukses'); elIkon.textContent = '✅'; }
+  else if (jenis === 'error') { el.classList.add('toast-error'); elIkon.textContent = '❌'; }
+  else { el.classList.add('toast-info'); elIkon.textContent = 'ℹ️'; }
+
+  elMsg.textContent = pesan;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() {
+    el.classList.remove('tampil');
+  }, 4000);
+}
+
+function tampilLoading(teks) {
+  document.getElementById('loading-teks').textContent = teks || 'Memproses...';
+  document.getElementById('overlay-loading').classList.add('tampil');
+}
+
+function sembunyiLoading() {
+  document.getElementById('overlay-loading').classList.remove('tampil');
+}
+</script>
+</body>
+</html>
